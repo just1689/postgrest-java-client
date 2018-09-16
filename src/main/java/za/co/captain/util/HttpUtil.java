@@ -23,7 +23,7 @@ public class HttpUtil {
 
     public static String get(String url) throws CaptainException {
 
-        LOG.log(Level.INFO, "GET " + url);
+        LOG.log(Level.FINE, "GET " + url);
 
         try {
             URL obj;
