@@ -15,7 +15,7 @@ public abstract class GenericRepository<T> {
 
     public void post(T t) throws CaptainException {
         try {
-            String response = HttpUtil.post(getTableUrl(), JsonUtil.objectToJson(t));
+            String response = HttpUtil.post(getTableUrl(), t);
             //TODO: check it went well!
         } catch (Exception e) {
             throw new CaptainException(e, "Failed to post");
@@ -24,7 +24,7 @@ public abstract class GenericRepository<T> {
 
     public void put(T t) throws CaptainException {
         try {
-            String response = HttpUtil.put(getTableUrl(), JsonUtil.objectToJson(t));
+            String response = HttpUtil.put(getTableUrl(), t);
             //TODO: check it went well!
         } catch (Exception e) {
             throw new CaptainException(e, "Failed to put");

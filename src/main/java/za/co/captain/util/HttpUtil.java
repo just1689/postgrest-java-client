@@ -2,14 +2,8 @@ package za.co.captain.util;
 
 import za.co.captain.exception.CaptainException;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
+import java.io.*;
+import java.net.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -92,61 +86,72 @@ public class HttpUtil {
     }
 
 
-    public static String post(String url, String body) throws CaptainException {
-        return sendWithMethod("POST", url, body);
+    public static String post(String url, Object item) throws CaptainException {
+        return sendWithMethod("POST", url, item);
 
     }
 
-    public static String put(String url, String body) throws CaptainException {
-        return sendWithMethod("PUT", url, body);
+    public static String put(String url, Object item) throws CaptainException {
+        return sendWithMethod("PUT", url, item);
 
     }
 
-    private static String sendWithMethod(String method, String url, String body) throws CaptainException {
+    private static String sendWithMethod(String method, String path, Object item) throws CaptainException {
 
         try {
-            URL obj;
-            obj = new URL(url);
-            HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
-            con.setRequestMethod(method);
-            con.setRequestProperty("User-Agent", USER_AGENT);
-            con.setRequestProperty("Content-type", "Application/json");
+            URL url = new URL(path);
 
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoOutput(true);
+            connection.setRequestMethod(method);
+            connection.setRequestProperty("Content-type", "application/json");
+            connection.setConnectTimeout(1000);
+            connection.setReadTimeout(60000);
 
-            con.setDoOutput(true);
-            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-            wr.writeBytes(body);
-            wr.flush();
-            wr.close();
+            JsonUtil.objectMapper.writeValue(connection.getOutputStream(), item);
+            if (connection.getResponseCode() != HttpURLConnection.HTTP_CREATED && connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                System.err.println("URL: " + path);
+                System.err.println("Object:");
+                System.err.println(JsonUtil.objectToJson(item));
 
-            int responseCode = con.getResponseCode();
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuilder response = new StringBuilder();
-
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-            if (responseCode != HTTP_OK) {
-                throw new CaptainException(new Exception("Failed to " + method), "Http code was:" + responseCode + "\n Body:\n" + response.toString());
+                throw new RuntimeException("Failed : HTTP error code : "
+                        + connection.getResponseCode());
             }
 
-            return response.toString();
-        } catch (MalformedURLException e) {
-            throw new CaptainException(e, "");
-        } catch (ProtocolException e) {
-            throw new CaptainException(e, "");
-        } catch (IOException e) {
-            throw new CaptainException(e, "");
-        } catch (Exception e) {
-            e.printStackTrace();
-            LOG.log(Level.INFO, url);
-            LOG.log(Level.INFO, body);
-            throw new CaptainException(e, "");
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    (connection.getInputStream())));
+
+            StringBuilder out = new StringBuilder();
+            String output;
+            while ((output = br.readLine()) != null) {
+                out.append(output);
+            }
+
+            connection.disconnect();
+            return out.toString();
+        } catch (SocketTimeoutException ex) {
+            LOG.log(Level.SEVERE, null, ex);
+            throw new CaptainException(ex, "Timeout!");
+        } catch (MalformedURLException ex) {
+            LOG.log(Level.SEVERE, null, ex);
+            throw new CaptainException(ex, "");
+        } catch (IOException ex) {
+            LOG.log(Level.SEVERE, null, ex);
+            throw new CaptainException(ex, "");
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, null, ex);
+            throw new CaptainException(ex, "");
         }
 
+    }
+
+    private static InputStream getInputStream(HttpsURLConnection con) {
+        try {
+            return con.getInputStream();
+        } catch (IOException e) {
+            //TODO: might not matter - see spec of Postgrest
+        }
+        return null;
     }
 }

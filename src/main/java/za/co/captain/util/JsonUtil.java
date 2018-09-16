@@ -11,7 +11,7 @@ import java.util.List;
 
 public class JsonUtil {
 
-    private static final ObjectMapper objectMapper;
+    public static final ObjectMapper objectMapper;
 
     static {
         objectMapper = new ObjectMapper();
