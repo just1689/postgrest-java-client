@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import za.co.captain.exception.CaptainException;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +15,7 @@ public class JsonUtil {
 
     static {
         objectMapper = new ObjectMapper();
+        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX"));
         //TODO: other settings (dates etc)
     }
 

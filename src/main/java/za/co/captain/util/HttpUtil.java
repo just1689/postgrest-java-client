@@ -121,9 +121,6 @@ public class HttpUtil {
             wr.close();
 
             int responseCode = con.getResponseCode();
-            if (responseCode != HTTP_OK) {
-                throw new CaptainException(new Exception("Failed to " + method), "Http code was:" + responseCode);
-            }
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(con.getInputStream()));
             String inputLine;
@@ -133,6 +130,9 @@ public class HttpUtil {
                 response.append(inputLine);
             }
             in.close();
+            if (responseCode != HTTP_OK) {
+                throw new CaptainException(new Exception("Failed to " + method), "Http code was:" + responseCode + "\n Body:\n" + response.toString());
+            }
 
             return response.toString();
         } catch (MalformedURLException e) {
@@ -142,6 +142,9 @@ public class HttpUtil {
         } catch (IOException e) {
             throw new CaptainException(e, "");
         } catch (Exception e) {
+            e.printStackTrace();
+            LOG.log(Level.INFO, url);
+            LOG.log(Level.INFO, body);
             throw new CaptainException(e, "");
         }
 
