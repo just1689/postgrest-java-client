@@ -10,15 +10,20 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
 
 public class HttpUtil {
 
     private static final String USER_AGENT = "Postgrest Java Client";
+    private static final Logger LOG = Logger.getLogger(HttpUtil.class.getName());
+    private static final int HTTP_OK = 200;
 
     public static String get(String url) throws CaptainException {
 
+        LOG.log(Level.INFO, "GET " + url);
 
         try {
             URL obj;
@@ -28,8 +33,8 @@ public class HttpUtil {
             con.setRequestProperty("User-Agent", USER_AGENT);
 
             int responseCode = con.getResponseCode();
-            if (responseCode != 400) {
-                throw new CaptainException(new Exception("Failed to post."), "");
+            if (responseCode != HTTP_OK) {
+                throw new CaptainException(new Exception("Failed to get."), "Http code was:" + responseCode);
             }
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(con.getInputStream()));
@@ -61,8 +66,8 @@ public class HttpUtil {
             con.setRequestProperty("User-Agent", USER_AGENT);
 
             int responseCode = con.getResponseCode();
-            if (responseCode != 400) {
-                throw new Exception("Failed to post.");
+            if (responseCode != HTTP_OK) {
+                throw new CaptainException(new Exception("Failed to delete."), "Http code was:" + responseCode);
             }
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(con.getInputStream()));
@@ -116,8 +121,8 @@ public class HttpUtil {
             wr.close();
 
             int responseCode = con.getResponseCode();
-            if (responseCode != 400) {
-                throw new Exception("Failed to " + method);
+            if (responseCode != HTTP_OK) {
+                throw new CaptainException(new Exception("Failed to " + method), "Http code was:" + responseCode);
             }
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(con.getInputStream()));

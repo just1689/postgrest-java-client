@@ -13,7 +13,7 @@ public class UsefulRepository<T> extends GenericRepository<T> {
 
 
     public String getTableUrl() {
-        return database.getUrl();
+        return database.getUrl() + table.getTableName();
     }
 
     public Class getTableClass() {
