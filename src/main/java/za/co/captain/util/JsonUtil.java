@@ -1,9 +1,11 @@
 package za.co.captain.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import za.co.captain.exception.CaptainException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class JsonUtil {
@@ -31,9 +33,10 @@ public class JsonUtil {
         }
     }
 
-    public static List<Object> jsonToObjects(String json) throws CaptainException {
+    public static List<Object> jsonToObjects(String json, Class clazz) throws CaptainException {
         try {
-            return objectMapper.readValue(json, List.class);
+            CollectionType listType = objectMapper.getTypeFactory().constructCollectionType(ArrayList.class, clazz);
+            return objectMapper.readValue(json, listType);
         } catch (IOException e) {
             throw new CaptainException(e, "jsonToObjects could not turn json into list.");
         }

@@ -17,6 +17,6 @@ public class UsefulRepository<T> extends GenericRepository<T> {
     }
 
     public Class getTableClass() {
-        return table.getClass();
+        return table.getClazz();
     }
 }

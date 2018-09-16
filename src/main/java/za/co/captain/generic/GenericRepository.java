@@ -47,7 +47,7 @@ public abstract class GenericRepository<T> {
     public ArrayList<T> getMany(String query) throws CaptainException {
         try {
             String json = HttpUtil.get(getTableUrl() + query);
-            List<Object> list = JsonUtil.jsonToObjects(json);
+            List<Object> list = JsonUtil.jsonToObjects(json, getTableClass());
             return castList(list);
         } catch (CaptainException e) {
             throw new CaptainException(e, "Failed to getMany");
